@@ -95,7 +95,7 @@ class _HomePageState extends State<HomePage> {
                              decoration: BoxDecoration(
                                borderRadius: BorderRadius.circular(25),
                                color: currBox.value == null ? Colors.transparent : Colors.white,
-                             ),
+                                ),
                               child:  Container(
 
                                 child: Center(
