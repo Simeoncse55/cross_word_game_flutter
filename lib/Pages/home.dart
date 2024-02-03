@@ -286,19 +286,87 @@ class _HomePageState extends State<HomePage> {
                  // ),
 
 
-
+          Text('BEST',style: TextStyle(backgroundColor: Colors.white,fontSize: 25,letterSpacing: 5),),
                  Stack(
                    children: [
-                    Transform.rotate(
-                      angle: 0.8,
-                      child: Container(
-                        height: 300, width: 300,
-                        child: const Lock(),
-                      ),
-                    ),
+
+                     Transform.rotate(
+                       angle: 0.8,
+                       child: Container(
+                         alignment: Alignment.center,
+                         height: 300, width: 300,
+                         child: const Lock(),
+                       ),
+                     ),
+
                      IgnorePointer(
-                        child: Boxes(),
-                     )
+                       // ignoringSemantics: true,
+                       child: Container(
+
+                         width: 300, height: 300,
+                            child:     Column(
+                           mainAxisAlignment: MainAxisAlignment.values[5],
+                           children: [
+                             Container(
+                               height: 80, width:80,
+                               decoration: BoxDecoration(
+                                   color: Colors.white,
+                                   borderRadius: BorderRadius.circular(50)
+                               ),
+                               child: Center(
+                                 child: Text(currGame.hints[3],style: TextStyle(fontSize:35,color: Colors.deepPurple),),
+                               ),
+                             ),
+                             Row(
+                               mainAxisAlignment: MainAxisAlignment.spaceAround,
+                               children: [
+                                 Padding(
+                                   padding: const EdgeInsets.only(right: 25.0),
+                                   child: Container(
+                                     height: 80, width:80,
+                                     decoration: BoxDecoration(
+                                         color: Colors.white,
+                                         borderRadius: BorderRadius.circular(50)
+                                     ),
+                                     child: Center(
+                                       child: Text(currGame.hints[1],style: TextStyle(fontSize:35,color: Colors.deepPurple),),
+                                     ),
+                                   ),
+                                 ),
+                                 Padding(
+                                   padding: const EdgeInsets.only(left: 25.0),
+                                   child: Container(
+                                     height: 80, width:80,
+                                     decoration: BoxDecoration(
+                                         color: Colors.white,
+                                         borderRadius: BorderRadius.circular(50)
+                                     ),
+                                     child: Center(
+                                       child: Text(currGame.hints[2],style: TextStyle(fontSize:35,color: Colors.deepPurple),),
+                                     ),
+                                   ),
+                                 ),
+                               ],
+                             ),
+                             Container(
+                               height: 80, width:80,
+                               decoration: BoxDecoration(
+                                   color: Colors.white,
+                                   borderRadius: BorderRadius.circular(50)
+                               ),
+                               child: Center(
+                                 child: Text(currGame.hints[0],style: TextStyle(fontSize:35,color: Colors.deepPurple),),
+                               ),
+                             ),
+                           ],
+                         )
+                         ,
+                       ),
+                     ),
+
+
+
+
                    ],
                  )
 
@@ -327,64 +395,14 @@ class _LockState extends State<Lock> {
   @override
   Widget build(BuildContext context) {
     return PatternLock(
+      notSelectedColor: Colors.transparent,
       selectedColor: Colors.white,
-      pointRadius: 25,
+      relativePadding: 0.7,
+      pointRadius:35,
       dimension: 2,
+
       onInputComplete: (List<int> input) {},
     );
   }
 }
 
-/// Boxes
-class Boxes extends StatelessWidget {
-  const Boxes({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 300,
-      width: 300,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: Colors.transparent,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            buildContainer(label: 'B', onTap: () {}),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                buildContainer(label: 'E', onTap: () {}),
-                const SizedBox(
-                  width: 20,
-                ),
-                buildContainer(label: 'S', onTap: () {}),
-              ],
-            ),
-            buildContainer(label: 'T', onTap: () {}),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget buildContainer(
-      {required String label, required Null Function() onTap}) {
-    return Container(
-      height: 90,
-      width: 90,
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(50), color: Colors.white),
-      child: Center(
-        child: Text(
-          label,
-          style: const TextStyle(fontSize: 50, color: Colors.deepPurple),
-        ),
-      ),
-    );
-  }
-
-}
