@@ -24,7 +24,7 @@ class Game{
 }
 List<Game> game  =[
 
-  Game(gridCount: 4, boxes: boxes, answers: answers,hints: ['B','E','S','T']),
+  Game(gridCount: 4, boxes: boxes, answers: answers,hints:['B','E','S','T']),
   Game(gridCount: 4, boxes: second, answers: answer_2,hints: ['G','O','N','E']),
 ];
 
@@ -43,8 +43,8 @@ List<Box> boxes =[
   Box(value: null, position: 12),
 ];
 List<Answers> answers =[
-  Answers(value: 'B E S T', position: [5,6,7,8]),
-  Answers(value: 'S E T', position: [2,6,10])
+  Answers(value: 'BEST', position: [5,6,7,8]),
+  Answers(value: 'SET', position: [2,6,10])
 ];
 
 // 2nd page

@@ -11,7 +11,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData(
         useMaterial3: true,
-        fontFamily: GoogleFonts.itim().fontFamily,
+        // fontFamily: GoogleFonts.itim().fontFamily,
       ),
 
       debugShowCheckedModeBanner: false,
