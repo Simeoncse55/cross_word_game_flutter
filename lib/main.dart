@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:word_game/Pages/home.dart';
+import 'package:get/get.dart';
+import 'Pages/splash_scrren.dart';
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
@@ -8,14 +10,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       theme: ThemeData(
         useMaterial3: true,
-        // fontFamily: GoogleFonts.itim().fontFamily,
+        fontFamily: GoogleFonts.itim().fontFamily,
       ),
 
       debugShowCheckedModeBanner: false,
-      home: const HomePage(),
+      home: HomePage(),
     );
   }
 }

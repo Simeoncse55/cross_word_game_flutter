@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:pattern_lock/pattern_lock.dart';
 import 'package:quiver/collection.dart';
@@ -13,22 +14,61 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final controller = PageController();
+  late Game currGame;
+
+  int _currentIndex = 0;
+
+  void _forward(int index) {
+    final page = index + 1;
+    if (index >= (boxes.length - 1)) return;
+    controller.jumpToPage(index + 1);
+  }
+
+  void _backward(int index) {
+    final page = index - 1;
+    // if (page.isNegative) return;
+    controller.jumpToPage(page);
+  }
+
+  // void _incrementIndex(int index) {
+  //   controller.jumpToPage(index + 1);
+  //   // setState(() {
+  //   //   _currentIndex = index < boxes.length ?
+  //   //       _currentIndex+1 :
+  //   //       _currentIndex;
+  //   // });
+  // }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.shuffle_rounded),
+        onPressed: () {
+          currGame.hints.shuffle();
+          setState(() {});
+        },
+      ),
       body: PageView.builder(
         physics: const NeverScrollableScrollPhysics(),
         controller: controller,
         //physics: NeverScrollableScrollPhysics(),
-        itemCount: 2,
+        itemCount: 7,
         itemBuilder: (context, index) {
-          var currGame = game[index];
+          print(index);
+          var _level = index + 1;
+          var _hintBadge = 3;
+
+          currGame = game[index];
+
           return Container(
             decoration: const BoxDecoration(
-              image: DecorationImage(
-                  image: AssetImage('images/bg1.png'), fit: BoxFit.cover),
-            ),
+                gradient: LinearGradient(begin: Alignment.topLeft, colors: [
+              Colors.black87,
+              Colors.deepPurple,
+            ])
+                // image: DecorationImage(image: AssetImage('images/bg1.png'), fit: BoxFit.cover),
+                ),
             child: Padding(
               padding: const EdgeInsets.all(25.0),
               child: Column(
@@ -38,17 +78,35 @@ class _HomePageState extends State<HomePage> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          'Word Game',
+                        Text(
+                          'Level $_level',
                           style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
                               fontSize: 30),
                         ),
-                        const Icon(
-                          Icons.settings,
-                          size: 25,
-                          color: Colors.white,
+
+                        /// Hint Badge...
+                        InkWell(
+                          onTap: () {},
+                          child: Badge(
+                              smallSize: 40,
+                              label: Text(
+                                '$_hintBadge',
+                                style: TextStyle(fontSize: 12),
+                              ),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(50)),
+                                // color: Colors.white,
+                                child: Center(
+                                  child: Image.asset(
+                                    'images/hint.png',
+                                    height: 40,
+                                  ),
+                                ),
+                              )),
                         ),
 
                         // back icon
@@ -60,7 +118,7 @@ class _HomePageState extends State<HomePage> {
                                 color: Colors.white),
                             child: InkWell(
                                 onTap: () {
-                                  controller.jumpToPage(index - 1);
+                                  _backward(index);
                                 },
                                 child: const Icon(
                                   Icons.skip_previous,
@@ -79,7 +137,7 @@ class _HomePageState extends State<HomePage> {
                                 onTap: () {
                                   controller.jumpToPage(index + 1);
                                 },
-                                child: const Icon(
+                                child: Icon(
                                   Icons.skip_next,
                                   size: 25,
                                   color: Colors.deepPurple,
@@ -89,11 +147,10 @@ class _HomePageState extends State<HomePage> {
                   ),
                   GridView.builder(
                       shrinkWrap: true,
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 4,
-                        mainAxisSpacing: 12,
-                        crossAxisSpacing: 12,
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: currGame.gridCount,
+                        mainAxisSpacing: 0,
+                        crossAxisSpacing: 4,
                       ),
                       itemCount: game[index].boxes.length,
                       itemBuilder: (context, boxIndex) {
@@ -102,23 +159,25 @@ class _HomePageState extends State<HomePage> {
                         return Stack(
                           children: [
                             Container(
-                              height: 100,
-                              width: 100,
+                              height: 50,
+                              width: 50,
                               decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(25),
+                                borderRadius: BorderRadius.circular(8),
                                 color: currBox.value == null
                                     ? Colors.transparent
                                     : Colors.white,
                               ),
                               child: Container(
                                 child: Center(
-                                  child: Text(
-                                    currBox.value == null
-                                        ? ' '
-                                        : '${currBox.value}',
-                                    style: const TextStyle(
-                                        fontSize: 35,
-                                        fontWeight: FontWeight.bold),
+                                  child: Container(
+                                    child: Text(
+                                      currBox.filled
+                                          ? (currBox.value ?? "")
+                                          : "",
+                                      style: const TextStyle(
+                                          fontSize: 35,
+                                          fontWeight: FontWeight.bold),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -126,26 +185,20 @@ class _HomePageState extends State<HomePage> {
                           ],
                         );
                       }),
-                  Text(
-                    'BEST',
-                    style: TextStyle(
-                        backgroundColor: Colors.white,
-                        fontSize: 25,
-                        letterSpacing: 5),
-                  ),
                   Stack(
                     children: [
                       Transform.rotate(
-                        angle: 0.8,
+                        angle: 0.7,
                         child: Container(
                           alignment: Alignment.center,
                           height: 300,
                           width: 300,
                           child: PatternLock(
-                            notSelectedColor: Colors.transparent,
+                            relativePadding: 1,
+                            selectThreshold: 39,
+                            notSelectedColor: Colors.white,
                             selectedColor: Colors.white,
-                            relativePadding: 0.7,
-                            pointRadius: 35,
+                            pointRadius: 30,
                             dimension: 2,
                             onInputComplete: (List<int> input) {
                               final hints = currGame.hints;
@@ -156,93 +209,86 @@ class _HomePageState extends State<HomePage> {
                               input.forEach((element) {
                                 answer += hints[element];
                               });
-                              debugPrint(answer);
+                              final ans = currGame.answers
+                                  .where((e) =>
+                                      e.value?.toLowerCase() ==
+                                      answer.toLowerCase())
+                                  .firstOrNull;
+                              if (ans != null) {
+                                currGame.boxes[ans.position[0]].filled = true;
+                                currGame.boxes[ans.position[1]].filled = true;
+                                if (answer.length == 3 || answer.length == 4) {
+                                  currGame.boxes[ans.position[2]].filled = true;
+                                }
+                                if (answer.length == 4) {
+                                  currGame.boxes[ans.position[3]].filled = true;
+                                }
+                              }
+                              setState(() {});
+
+                              // debugPrint(answer);
                             },
                           ),
                         ),
                       ),
                       IgnorePointer(
-                        // ignoringSemantics: true,
                         child: Container(
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border:
+                                  Border.all(color: Colors.white, width: 6)),
                           width: 300,
                           height: 300,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.values[5],
-                            children: [
-                              Container(
-                                height: 80,
-                                width: 80,
-                                decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(50)),
-                                child: Center(
+                          child: Container(
+                            height: 300,
+                            width: 300,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.values[5],
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      top: 28.0, right: 10),
                                   child: Text(
                                     currGame.hints[0],
                                     style: TextStyle(
-                                        fontSize: 35, color: Colors.deepPurple),
+                                        color: Colors.black, fontSize: 30),
                                   ),
                                 ),
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(right: 25.0),
-                                    child: Container(
-                                      height: 80,
-                                      width: 80,
-                                      decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius:
-                                              BorderRadius.circular(50)),
-                                      child: Center(
-                                        child: Text(
-                                          currGame.hints[2],
-                                          style: TextStyle(
-                                            fontSize: 35,
-                                            color: Colors.deepPurple,
-                                          ),
-                                        ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                          left: 0, top: 10),
+                                      child: Text(
+                                        currGame.hints[2],
+                                        style: TextStyle(
+                                            color: Colors.black, fontSize: 30),
                                       ),
                                     ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(left: 25.0),
-                                    child: Container(
-                                      height: 80,
-                                      width: 80,
-                                      decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius:
-                                              BorderRadius.circular(50)),
-                                      child: Center(
-                                        child: Text(
-                                          currGame.hints[1],
-                                          style: TextStyle(
-                                              fontSize: 35,
-                                              color: Colors.deepPurple),
-                                        ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                          right: 0.0, bottom: 10),
+                                      child: Text(
+                                        currGame.hints[1],
+                                        style: TextStyle(
+                                            color: Colors.black, fontSize: 30),
                                       ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                              Container(
-                                height: 80,
-                                width: 80,
-                                decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(50)),
-                                child: Center(
+                                  ],
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      bottom: 26, left: 15),
                                   child: Text(
                                     currGame.hints[3],
                                     style: TextStyle(
-                                        fontSize: 35, color: Colors.deepPurple),
+                                        color: Colors.black, fontSize: 30),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -257,4 +303,3 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
-
