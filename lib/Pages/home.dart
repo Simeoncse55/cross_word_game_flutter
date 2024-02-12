@@ -1,3 +1,6 @@
+import 'dart:math';
+
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -15,6 +18,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final controller = PageController();
   late Game currGame;
+  late Box box;
 
   int _currentIndex = 0;
 
@@ -38,6 +42,8 @@ class _HomePageState extends State<HomePage> {
   //   //       _currentIndex;
   //   // });
   // }
+  int _hintBadge = 10;
+  int _answerCount = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -56,11 +62,7 @@ class _HomePageState extends State<HomePage> {
         itemCount: 7,
         itemBuilder: (context, index) {
           print(index);
-          var _level = index + 1;
-          var _hintBadge = 3;
-
           currGame = game[index];
-
           return Container(
             decoration: const BoxDecoration(
                 gradient: LinearGradient(begin: Alignment.topLeft, colors: [
@@ -79,7 +81,7 @@ class _HomePageState extends State<HomePage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Level $_level',
+                          'Level ${index + 1}',
                           style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -88,7 +90,25 @@ class _HomePageState extends State<HomePage> {
 
                         /// Hint Badge...
                         InkWell(
-                          onTap: () {},
+                          onTap: () {
+                            print('tapped');
+                            if (_hintBadge <= 0) {
+                              AwesomeDialog(
+                                  context: context,
+                                  dialogType: DialogType.error,
+                                  animType: AnimType.rightSlide,
+                                  title: 'NO MORE HINTS !',
+                                  desc: 'because you alredy used maximum number of hints',
+                                  btnCancelOnPress: () {},
+                            )..show();
+
+                              return;
+                            }
+                            int position = _hintGen();
+                            currGame.boxes[position].filled = true;
+                            _hintBadge--;
+                            setState(() {});
+                          },
                           child: Badge(
                               smallSize: 40,
                               label: Text(
@@ -109,38 +129,50 @@ class _HomePageState extends State<HomePage> {
                               )),
                         ),
 
-                        // back icon
-                        Container(
-                            height: 30,
-                            width: 40,
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                                color: Colors.white),
-                            child: InkWell(
-                                onTap: () {
-                                  _backward(index);
-                                },
-                                child: const Icon(
-                                  Icons.skip_previous,
-                                  size: 25,
-                                  color: Colors.deepPurple,
-                                ))),
+                        /// back button
+                        // Container(
+                        //     height: 30,
+                        //     width: 40,
+                        //     decoration: BoxDecoration(
+                        //         borderRadius: BorderRadius.circular(10),
+                        //         color: Colors.white),
+                        //     child: InkWell(
+                        //         onTap: () {
+                        //           _backward(index);
+                        //         },
+                        //         child: const Icon(
+                        //           Icons.skip_previous,
+                        //           size: 25,
+                        //           color: Colors.deepPurple,
+                        //         ))),
 
                         // next button
                         Container(
                             height: 30,
-                            width: 40,
+                            width: 100,
                             decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(10),
-                                color: Colors.white),
+                                color: Colors.white54),
+                            /// Forward button >>>>>>
                             child: InkWell(
                                 onTap: () {
                                   controller.jumpToPage(index + 1);
+                                  _answerCount=0;
+                                  _hintBadge = _hintBadge-1;
+                                  setState(() {
+
+                                  });
                                 },
-                                child: Icon(
-                                  Icons.skip_next,
-                                  size: 25,
-                                  color: Colors.deepPurple,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text('Skip', style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),),
+                                    Icon(
+                                      Icons.skip_next,
+                                      size: 25,
+                                      color: Colors.white,
+                                    ),
+                                  ],
                                 )))
                       ],
                     ),
@@ -215,6 +247,7 @@ class _HomePageState extends State<HomePage> {
                                       answer.toLowerCase())
                                   .firstOrNull;
                               if (ans != null) {
+                                _answerCount++;
                                 currGame.boxes[ans.position[0]].filled = true;
                                 currGame.boxes[ans.position[1]].filled = true;
                                 if (answer.length == 3 || answer.length == 4) {
@@ -223,6 +256,23 @@ class _HomePageState extends State<HomePage> {
                                 if (answer.length == 4) {
                                   currGame.boxes[ans.position[3]].filled = true;
                                 }
+                              }
+                              if (_answerCount == currGame.answers.length) {
+                                AwesomeDialog(
+                                  context: context,
+                                  dialogType: DialogType.success,
+                                  animType: AnimType.rightSlide,
+                                  title: 'Success',
+                                  desc: 'move to next level',
+
+                                  btnOkOnPress: (){
+                                    controller.jumpToPage(index + 1);
+                                    _answerCount=0;
+                                    // _hintBadge = 3;
+                                    setState(() {
+                                    });
+                                  }
+                                )..show();
                               }
                               setState(() {});
 
@@ -301,5 +351,21 @@ class _HomePageState extends State<HomePage> {
         },
       ),
     );
+  }
+
+  int _hintGen() {
+    print('_hintGen');
+    final withVal = currGame.boxes
+        .where(
+          (element) => element.value != null,
+        )
+        .toList();
+    final va = Random().nextInt((withVal.length - 1));
+
+    int position = withVal[va].position;
+    if (currGame.boxes[position].filled == true) {
+      position = _hintGen();
+    }
+    return position;
   }
 }

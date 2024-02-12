@@ -1,6 +1,6 @@
 class Box {
   String? value;
-  final int? position;
+  final int position;
   bool filled;
 
   Box({required this.value, required this.position, this.filled = false});
@@ -31,7 +31,8 @@ List<Game> game = [
       gridCount: 4,
       boxes: boxes,
       answers: answers,
-      hints: ['B', 'E', 'S', 'T']),
+      hints: ['B', 'E', 'S', 'T'],
+  ),
   Game(
       gridCount: 4,
       boxes: second,
@@ -46,20 +47,20 @@ List<Game> game = [
   Game(gridCount: 5, boxes: fourth, answers: answer_4, hints: ['Y','E','S','A']),
   Game(gridCount: 5, boxes: five, answers: answer_5, hints: ['Y','A','R','D']),
   Game(gridCount: 5, boxes: six, answers: answer_6, hints: ['P','A','T','H']),
-  Game(gridCount : 5, boxes: seven, answers: answer_7, hints: ['B','O','W','L'])
+  Game(gridCount : 5, boxes: seven, answers: answer_7, hints: ['B','I','R','D'])
 ];
 
 
 //first
 List<Box> boxes = [
   Box(value: null, position: 0),
-  Box(value: 'S', position: 1, filled: true),
+  Box(value: 'S', position: 1, ),
   Box(value: null, position: 2),
   Box(value: null, position: 3),
   Box(value: 'B', position: 4),
   Box(value: 'E', position: 5),
   Box(value: 'S', position: 6),
-  Box(value: 'T', position: 7, filled: true),
+  Box(value: 'T', position: 7, ),
   Box(value: null, position: 8),
   Box(value: 'T', position: 9),
   Box(value: null, position: 10),
@@ -73,10 +74,10 @@ List<Answers> answers = [
 // 2nd page
 
 List<Box> second = [
-  Box(value: 'Y', position: 0,filled: true),
+  Box(value: 'Y', position: 0,),
   Box(value: 'A', position: 1),
   Box(value: 'R', position: 2),
-  Box(value: 'D', position: 3,filled: true),
+  Box(value: 'D', position: 3,),
   Box(value: null, position: 4),
   Box(value: null, position: 5),
   Box(value: null, position: 6),
@@ -84,7 +85,7 @@ List<Box> second = [
   Box(value: null, position: 8),
   Box(value: null, position: 9),
   Box(value: null, position: 10),
-  Box(value: 'Y', position: 11,filled: true),
+  Box(value: 'Y', position: 11,),
 ];
 List<Answers> answer_2 = [
   Answers(value: 'YARD', position: [0,1,2,3]),
@@ -240,7 +241,7 @@ List<Answers> answer_7 = [
   Answers(value: 'BIRD', position: [2,7,12,17]),
   Answers(value: 'RIB', position: [5,10,15]),
   Answers(value: 'BID', position: [15,16,17]),
-  Answers(value: 'RID', position: [12,13,14]),
+  Answers(value: 'RID', position: [11,12,13]),
 ];
 
 // Eight
