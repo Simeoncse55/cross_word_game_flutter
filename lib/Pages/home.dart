@@ -1,3 +1,6 @@
+import 'dart:math';
+
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -38,6 +41,8 @@ class _HomePageState extends State<HomePage> {
   //   //       _currentIndex;
   //   // });
   // }
+  int _hintBadge = 2;
+  List<String> _answerCount = List.empty(growable: true);
 
   @override
   Widget build(BuildContext context) {
@@ -56,11 +61,7 @@ class _HomePageState extends State<HomePage> {
         itemCount: 7,
         itemBuilder: (context, index) {
           print(index);
-          var _level = index + 1;
-          var _hintBadge = 3;
-
           currGame = game[index];
-
           return Container(
             decoration: const BoxDecoration(
                 gradient: LinearGradient(begin: Alignment.topLeft, colors: [
@@ -79,7 +80,7 @@ class _HomePageState extends State<HomePage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Level $_level',
+                          'Level ${index + 1}',
                           style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -88,7 +89,45 @@ class _HomePageState extends State<HomePage> {
 
                         /// Hint Badge...
                         InkWell(
-                          onTap: () {},
+                          onTap: () {
+                            print('tapped');
+                            if (_hintBadge <= 0) {
+                              AwesomeDialog(
+                                context: context,
+                                dialogType: DialogType.error,
+                                animType: AnimType.rightSlide,
+                                title: 'NO MORE HINTS !',
+                                desc:
+                                    'because you alredy used maximum number of hints',
+                                btnCancelOnPress: () {},
+                              ).show();
+                              return;
+                            }
+                            int position = _hintGen();
+                            currGame.boxes[position].filled = true;
+                            _hintBadge--;
+                            final avail = currGame.boxes
+                                .where((element) => element.value != null)
+                                .toList();
+                            final filled =
+                                avail.any((element) => element.filled != true);
+                            if (!filled) {
+                              AwesomeDialog(
+                                  dismissOnTouchOutside: false,
+                                  context: context,
+                                  dialogType: DialogType.success,
+                                  animType: AnimType.rightSlide,
+                                  title: 'Success',
+                                  desc: 'move to next level',
+                                  btnOkOnPress: () {
+                                    controller.jumpToPage(index + 1);
+                                    _answerCount.clear();
+                                    _hintBadge = 2;
+                                    setState(() {});
+                                  }).show();
+                            }
+                            setState(() {});
+                          },
                           child: Badge(
                               smallSize: 40,
                               label: Text(
@@ -109,7 +148,7 @@ class _HomePageState extends State<HomePage> {
                               )),
                         ),
 
-                        // back icon
+                        /// back button
                         Container(
                             height: 30,
                             width: 40,
@@ -129,18 +168,34 @@ class _HomePageState extends State<HomePage> {
                         // next button
                         Container(
                             height: 30,
-                            width: 40,
+                            width: 100,
                             decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(10),
-                                color: Colors.white),
+                                color: Colors.white54),
+
+                            /// SKIP button >>>>>>
                             child: InkWell(
                                 onTap: () {
                                   controller.jumpToPage(index + 1);
+                                  _answerCount.clear();
+                                  _hintBadge = 2;
+                                  setState(() {});
                                 },
-                                child: Icon(
-                                  Icons.skip_next,
-                                  size: 25,
-                                  color: Colors.deepPurple,
+                                child: const Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      'Skip',
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    Icon(
+                                      Icons.skip_next,
+                                      size: 25,
+                                      color: Colors.white,
+                                    ),
+                                  ],
                                 )))
                       ],
                     ),
@@ -167,18 +222,12 @@ class _HomePageState extends State<HomePage> {
                                     ? Colors.transparent
                                     : Colors.white,
                               ),
-                              child: Container(
-                                child: Center(
-                                  child: Container(
-                                    child: Text(
-                                      currBox.filled
-                                          ? (currBox.value ?? "")
-                                          : "",
-                                      style: const TextStyle(
-                                          fontSize: 35,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                  ),
+                              child: Center(
+                                child: Text(
+                                  currBox.filled ? (currBox.value ?? "") : "",
+                                  style: const TextStyle(
+                                      fontSize: 35,
+                                      fontWeight: FontWeight.bold),
                                 ),
                               ),
                             ),
@@ -204,17 +253,20 @@ class _HomePageState extends State<HomePage> {
                               final hints = currGame.hints;
                               debugPrint(hints.toString());
                               debugPrint(input.toString());
-
                               String answer = '';
-                              input.forEach((element) {
+                              for (var element in input) {
                                 answer += hints[element];
-                              });
+                              }
                               final ans = currGame.answers
                                   .where((e) =>
                                       e.value?.toLowerCase() ==
                                       answer.toLowerCase())
                                   .firstOrNull;
+
                               if (ans != null) {
+                                if (!_answerCount.contains(answer)) {
+                                  _answerCount.add(answer);
+                                }
                                 currGame.boxes[ans.position[0]].filled = true;
                                 currGame.boxes[ans.position[1]].filled = true;
                                 if (answer.length == 3 || answer.length == 4) {
@@ -223,6 +275,22 @@ class _HomePageState extends State<HomePage> {
                                 if (answer.length == 4) {
                                   currGame.boxes[ans.position[3]].filled = true;
                                 }
+                              }
+                              if (_answerCount.length ==
+                                  currGame.answers.length) {
+                                AwesomeDialog(
+                                    dismissOnTouchOutside: false,
+                                    context: context,
+                                    dialogType: DialogType.success,
+                                    animType: AnimType.rightSlide,
+                                    title: 'Success',
+                                    desc: 'move to next level',
+                                    btnOkOnPress: () {
+                                      controller.jumpToPage(index + 1);
+                                      _answerCount.clear();
+                                      _hintBadge = 2;
+                                      setState(() {});
+                                    }).show();
                               }
                               setState(() {});
 
@@ -301,5 +369,21 @@ class _HomePageState extends State<HomePage> {
         },
       ),
     );
+  }
+
+  int _hintGen() {
+    print('_hintGen');
+    final withVal = currGame.boxes
+        .where(
+          (element) => element.value != null,
+        )
+        .toList();
+    final va = withVal.indexWhere((element) => element.filled != true);
+
+    int position = withVal[va].position;
+    // if (currGame.boxes[position].filled == true) {
+    //   position = _hintGen();
+    // }
+    return position;
   }
 }
