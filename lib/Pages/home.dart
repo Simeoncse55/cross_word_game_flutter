@@ -119,7 +119,7 @@ class _HomePageState extends State<HomePage> {
                                   animType: AnimType.rightSlide,
                                   title: 'Success',
                                   desc: 'move to next level',
-                                  btnOkOnPress: () {
+                                   btnOkOnPress: () {
                                     controller.jumpToPage(index + 1);
                                     _answerCount.clear();
                                     _hintBadge = 2;
